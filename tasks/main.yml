@@ -34,8 +34,8 @@
 # tasks. Also, add a systemd unit and enable and start the service.
 - name: Kubernetes symbolic links
   file:
-      dest: "{{ app_base }}/bin/k3s"
-      src: "{{ app_base }}/bin/{{ item }}"
+      src: "{{ app_base }}/bin/k3s"
+      dest: "{{ app_base }}/bin/{{ item }}"
       state: link
   with_items:
       - kubectl
