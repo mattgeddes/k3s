@@ -1,5 +1,6 @@
 ---
 # vars file for k3s
+app_base: "/opt/k3s"
 k3s_ver: "v1.18.4+k3s1"
 k3s_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') }}"
 image_arch: "{{ ansible_architecture | regex_replace('armv7l','armhf') }}"
