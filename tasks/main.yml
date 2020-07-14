@@ -36,7 +36,7 @@
   file:
       src: "{{ app_base }}/k3s"
       dest: "{{ app_base }}/{{ item }}"
-      state: symlink
+      state: link
   with_items:
       - kubectl
       - crictl
