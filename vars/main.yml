@@ -11,5 +11,5 @@ k3s_urls: [
     }
 ]
 k3s_images:
-    - url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-airgap-images-{{ images_arch }}.tar"
-      filename: "k3s-airgap-images-{{ images_arch }}.tar"
+    - url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-airgap-images-{{ image_arch }}.tar"
+      filename: "k3s-airgap-images-{{ image_arch }}.tar"
