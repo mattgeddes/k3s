@@ -1,0 +1,14 @@
+---
+# vars file for k3s
+k3s_ver: "v1.18.4+k3s1"
+k3s_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') }}"
+image_arch: "{{ ansible_architecture | regex_replace('armv7l','armhf') }}"
+k3s_base: "https://github.com/rancher/k3s/releases/download"
+k3s_urls: [
+    {
+        url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-{{ k3s_arch }}", filename: "k3s"
+    }
+]
+k3s_images:
+    - url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-airgap-images-{{ images_arch }}.tar"
+      filename: "k3s-airgap-images-{{ images_arch }}.tar"

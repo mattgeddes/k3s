@@ -1,0 +1,43 @@
+---
+# TODO: Download binaries to local cache and have each node pull from there.
+- name: Application package directory tree
+  file:
+      state: directory
+      mode: 0755
+      path: "{{ item }}"
+  with_items:
+      - "{{ app_base }}/bin"
+      - "{{ app_base }}/share"
+      - "{{ app_base }}/share/images"
+- name: Retrieve k3s binaries
+  get_url:
+      url: "{{ item.url }}"
+      mode: 0755
+      dest: "{{ app_base }}/bin/{{ item.filename }}"
+  with_items:
+      - "{{ k3s_urls }}"
+- name: Retrieve k3s airgap images
+  get_url:
+      url: "{{ item.url }}"
+      mode: 0755
+      dest: "{{ app_base }}/share/{{ item.filename }}"
+  with_items:
+      - "{{ k3s_images }}"
+- name: Extract k3s airgap images
+  unarchive:
+      dest: "{{ app_base }}/share/images"
+      src: "{{ app_base }}/share/{{ item.filename }}"
+      remote_src: true
+  with_items:
+      - "{{ k3s_images }}"
+# The following are steps stolen from the installer script. TODO: add SELinux
+# tasks. Also, add a systemd unit and enable and start the service.
+- name: Kubernetes symbolic links
+  file:
+      src: "{{ app_base }}/k3s"
+      dest: "{{ app_base }}/{{ item }}"
+      state: symlink
+  with_items:
+      - kubectl
+      - crictl
+      - ctr
