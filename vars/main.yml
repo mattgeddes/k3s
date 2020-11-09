@@ -1,15 +1,20 @@
 ---
 # vars file for k3s
 app_base: "/opt/k3s"
-k3s_ver: "v1.18.4+k3s1"
+k3s_ver: "v1.19.3+k3s2"
 k3s_arch: "{{ ansible_architecture | regex_replace('armv7l','armhf') }}"
-image_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') }}"
+image_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') | regex_replace('x86_64','amd64') }}"
 k3s_base: "https://github.com/rancher/k3s/releases/download"
+k3s_file: "{% if k3s_arch == 'x86_64' %}k3s{% else %}k3s-{{ k3s_arch }}{% endif %}"
 k3s_urls: [
     {
-        url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-{{ k3s_arch }}", filename: "k3s"
+        url: "{{ k3s_base }}/{{ k3s_ver }}/{{ k3s_file }}", filename: "k3s"
     }
 ]
 k3s_images:
     - url: "{{ k3s_base }}/{{ k3s_ver }}/k3s-airgap-images-{{ image_arch }}.tar"
       filename: "k3s-airgap-images-{{ image_arch }}.tar"
+
+helm_version: "v3.4.0"
+helm_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') }}"
+helm_url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch }}.tar.gz"
