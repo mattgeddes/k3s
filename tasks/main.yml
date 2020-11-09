@@ -7,8 +7,8 @@
       path: "{{ item }}"
   with_items:
       - "{{ app_base }}/bin"
-      - "{{ app_base }}/share"
-      - "{{ app_base }}/share/images"
+      - "{{ app_base }}/etc"
+
 - name: Retrieve k3s binaries
   get_url:
       url: "{{ item.url }}"
@@ -16,22 +16,28 @@
       dest: "{{ app_base }}/bin/{{ item.filename }}"
   with_items:
       - "{{ k3s_urls }}"
+
+- name: Images and config directories
+  file:
+      state: directory
+      recurse: true
+      path: "{{ item }}"
+      mode: 0750
+      owner: root
+      group: root
+  with_items:
+      - "/var/lib/rancher/k3s/agent/images"
+      - "/etc/rancher/k3s"
+  when: k3sroles == "agent"
+
 - name: Retrieve k3s airgap images
   get_url:
       url: "{{ item.url }}"
       mode: 0755
-      dest: "{{ app_base }}/share/{{ item.filename }}"
+      dest: "{{ k3s_images_dir }}"
   with_items:
       - "{{ k3s_images }}"
-- name: Extract k3s airgap images
-  unarchive:
-      dest: "{{ app_base }}/share/images"
-      src: "{{ app_base }}/share/{{ item.filename }}"
-      remote_src: true
-  with_items:
-      - "{{ k3s_images }}"
-# The following are steps stolen from the installer script. TODO: add SELinux
-# tasks. Also, add a systemd unit and enable and start the service.
+
 - name: Kubernetes symbolic links
   file:
       src: "{{ app_base }}/bin/k3s"
@@ -41,3 +47,59 @@
       - kubectl
       - crictl
       - ctr
+
+- name: systemd service unit file
+  template:
+      src: k3s.service.j2
+      dest: /etc/systemd/system/k3s.service
+      owner: root
+      group: root
+      mode: 0664
+
+- name: enable and start k3s on master node
+  systemd:
+      name: k3s
+      state: started
+      enabled: true
+      daemon_reload: true
+  when: k3srole == "server" and enabled == true
+
+- name: Wait for master to start and create the token file
+  wait_for:
+      path: /var/lib/rancher/k3s/server/node-token
+      state: present
+  when: k3srole == "server"
+
+- name: k3s token from master node
+  slurp:
+      src: "/var/lib/rancher/k3s/server/node-token"
+  register: master_token
+  when: k3srole == "server"
+
+- name: Store k3s master node token as variable
+  set_fact:
+      k3stoken: "{{ hostvars[master_node]['master_token'] }}"
+
+- name: k3s token for agents
+  copy:
+      content: "{{ k3stoken.content | b64decode }}"
+      dest: "/etc/rancher/k3s/token"
+      owner: root
+      mode: 0600
+  when: k3srole == "agent"
+
+- name: enable and start k3s on agent nodes
+  systemd:
+      name: k3s
+      state: started
+      enabled: true
+      daemon_reload: true
+  when: k3srole == "agent" and enabled == true
+
+- name: Disable select nodes
+  systemd:
+      name: k3s
+      state: stopped
+      enabled: false
+      daemon_reload: true
+  when: k3srole is defined and enabled == false
