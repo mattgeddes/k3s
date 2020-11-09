@@ -28,7 +28,6 @@
   with_items:
       - "/var/lib/rancher/k3s/agent/images"
       - "/etc/rancher/k3s"
-  when: k3sroles == "agent"
 
 - name: Retrieve k3s airgap images
   get_url:
@@ -103,3 +102,10 @@
       enabled: false
       daemon_reload: true
   when: k3srole is defined and enabled == false
+
+- name: Helm package manager
+  unarchive:
+      src: "{{ helm_url }}"
+      dest: "{{ app_base }}"
+      remote_src: true
+  when: include_helm == true
