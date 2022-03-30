@@ -9,7 +9,6 @@ WantedBy=multi-user.target
 
 [Service]
 Type=exec
-#EnvironmentFile={{ k3s_env }}
 KillMode=process
 Delegate=yes
 LimitNOFILE=1048576
@@ -22,7 +21,7 @@ RestartSec=5s
 ExecStartPre=/sbin/modprobe br_netfilter
 ExecStartPre=/sbin/modprobe overlay
 {% if k3srole == "server" %}
-ExecStart={{ k3s_dir }}/bin/k3s {{ k3srole }} --bind-address {{ k3s_bind }}
+ExecStart={{ app_base }}/bin/k3s {{ k3srole }} --bind-address {{ k3s_bind }}
 {% elif k3srole == "agent" %}
-ExecStart={{ k3s_dir }}/bin/k3s {{ k3srole }} --token-file /etc/rancher/k3s/token --server https://{{ master_node }}:6443
+ExecStart={{ app_base }}/bin/k3s {{ k3srole }} --token-file /etc/rancher/k3s/token --server https://{{ master_node }}:6443
 {% endif %}

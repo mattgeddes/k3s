@@ -17,5 +17,5 @@ k3s_images:
 k3s_images_dir: "/var/lib/rancher/k3s/agent/images"
 
 helm_version: "v3.4.0"
-helm_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') }}"
+helm_arch: "{{ ansible_architecture | regex_replace('armv7l','arm') | regex_replace('x86_64','amd64') }}"
 helm_url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ helm_arch }}.tar.gz"

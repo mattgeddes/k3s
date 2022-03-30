@@ -22,7 +22,6 @@
       state: directory
       recurse: true
       path: "{{ item }}"
-      mode: 0750
       owner: root
       group: root
   with_items:
@@ -108,4 +107,12 @@
       src: "{{ helm_url }}"
       dest: "{{ app_base }}"
       remote_src: true
+      #creates: "{{ app_base }}/linux-{{ helm_arch }}/helm"
+  when: include_helm == true
+
+- name: Helm binary hard link
+  file:
+      state: hard
+      src: "{{ app_base }}/linux-{{ helm_arch }}/helm"
+      dest: "{{ app_base }}/bin/helm"
   when: include_helm == true
