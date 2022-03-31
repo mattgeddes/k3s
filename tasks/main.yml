@@ -16,6 +16,7 @@
       dest: "{{ app_base }}/bin/{{ item.filename }}"
   with_items:
       - "{{ k3s_urls }}"
+  register: k3s
 
 - name: Images and config directories
   file:
@@ -35,6 +36,7 @@
       dest: "{{ k3s_images_dir }}"
   with_items:
       - "{{ k3s_images }}"
+  when: k3s.changed
 
 - name: Kubernetes symbolic links
   file:

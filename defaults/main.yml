@@ -1,2 +1,7 @@
 ---
-# defaults file for k3s
+app_base: /srv/k3s
+k3srole: agent
+enabled: true
+k3s_ver: v1.23.4+k3s1
+include_helm: true
+helm_version: v3.8.1
